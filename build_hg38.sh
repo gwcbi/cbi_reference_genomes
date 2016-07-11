@@ -3,12 +3,12 @@
 umask 0002
 cd /groups/cbi/shared/References/cbi_reference_genomes.git
 
-# Download iGenomes
+### Download iGenomes ####################################################################
 mkdir -p Archive && cd Archive
 wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg38/Homo_sapiens_UCSC_hg38.tar.gz
 cd ..
 
-# Extract iGenome
+### Extract iGenome ######################################################################
 cat <<EOF
 #! /bin/bash
 umask 0002
@@ -18,7 +18,7 @@ tar --use-compress-program=pigz -xf ../Archive/Homo_sapiens_UCSC_hg38.tar.gz
 
 EOF
 
-# Build tophat references
+### Build tophat references ##############################################################
 sbatch -N 1 -t 2880 -p short <<EOF
 #! /bin/bash
 umask 0002
@@ -31,7 +31,7 @@ tophat2 -G Genes/genes.gtf --transcriptome-index Tophat2Index ../Sequence/Bowtie
 
 EOF
 
-# HISAT setup
+### HISAT setup ##########################################################################
 cd /groups/cbi/shared/References/cbi_reference_genomes.git/References/Homo_sapiens/UCSC/hg38/Sequence
 mkdir -p Hisat2Index && cd Hisat2Index
 [[ ! -e genome.fa ]] && ln -s ../WholeGenomeFasta/genome.fa
@@ -47,7 +47,7 @@ hisat2_extract_snps_haplotypes_UCSC.py genome.fa snp144Common.txt.gz snp144
 hisat2_extract_splice_sites.py genes.gtf > genes.splice
 hisat2_extract_exons.py genes.gtf > genes.exon
 
-# Build HISAT genome
+### Build HISAT genome ###################################################################
 sbatch -N 1 -t 2880 -p short <<EOF
 #! /bin/bash
 umask 0002
@@ -58,7 +58,7 @@ module load hisat/2.0.4
 hisat2-build genome.fa genome
 EOF
 
-# Build HISAT genome_snp_tran
+### Build HISAT genome_snp_tran ##########################################################
 sbatch -N 1 -t 2880 -p 2tb <<EOF
 #! /bin/bash
 umask 0002
