@@ -42,7 +42,7 @@ rsync -a -P rsync://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/snp144Commo
 cd ../../Sequence/Hisat2Index
 [[ ! -e snp144Common.txt.gz ]] && ln -s ../../Annotation/Variation/snp144Common.txt.gz
 
-module load hisat
+module load hisat2
 hisat2_extract_snps_haplotypes_UCSC.py genome.fa snp144Common.txt.gz snp144
 hisat2_extract_splice_sites.py genes.gtf > genes.splice
 hisat2_extract_exons.py genes.gtf > genes.exon
@@ -54,7 +54,7 @@ umask 0002
 cd /groups/cbi/shared/References/cbi_reference_genomes.git/References
 cd Homo_sapiens/UCSC/hg38/Sequence/Hisat2Index
 
-module load hisat/2.0.4
+module load hisat2/2.0.4
 hisat2-build genome.fa genome
 EOF
 
@@ -65,6 +65,6 @@ umask 0002
 cd /groups/cbi/shared/References/cbi_reference_genomes.git/References
 cd Homo_sapiens/UCSC/hg38/Sequence/Hisat2Index
 
-module load hisat/2.0.4
+module load hisat2/2.0.4
 hisat2-build --snp snp144.snp --haplotype snp144.haplotype --ss genes.splice --exon genes.exon genome.fa genome_snp_tran
 EOF
