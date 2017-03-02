@@ -29,6 +29,24 @@ else:
 # rsync -av References/Homo_sapiens/UCSC/hg19 /lustre/groups/cbi/shared/References/Homo_sapiens/UCSC
 """
 
+def synccommands(bsource, bdest, dry=False):
+    dry = True
+    pre,id = os.path.split(bsource)
+    if not os.path.isdir(bdest):
+        print >>sys.stdout, '# Create destination directory:'
+        print >>sys.stdout, 'mkdir -p %s' % (bdest)
+        if not dry: subprocess.check_output(["mkdir", "-p", bdest])
+    else:
+        print >>sys.stdout, '# Destination directory found.'
+    print >>sys.stdout, '# Rsync command for %s:' % id
+    print >>sys.stdout, 'rsync -av %s %s' % (bsource, bdest)
+    if not dry: subprocess.check_output(["rsync", "-av", bsource, bdest])    
+    # print >>sys.stderr, 'Set directory permissions:\n\tfind %s -type d -exec chmod 0555 {} \;' % os.path.join(bdest,id)
+    # if not dry: subprocess.check_output(["find", os.path.join(bdest,id), '-type', 'd', '-exec', 'chmod', '0555', '{}', '\;'])
+    # print >>sys.stderr, 'Set file permissions:\n\tfind %s -type f -exec chmod 0444 {} \;' % os.path.join(bdest,id)
+    # if not dry: subprocess.check_output(["find", os.path.join(bdest,id), '-type', 'f', '-exec', 'chmod', '0444', '{}', '\;'])
+    print >>sys.stdout, '# Sync complete for %s' % id
+
 def main(args):
     build_paths = sorted(glob(os.path.join(args.source_path, '*/*/*')))
     if len(build_paths) == 0:
@@ -55,16 +73,20 @@ def main(args):
     if id in bdata:
         build_source = bdata[id]['path']
         build_dest   = os.path.join( os.path.join(args.dest_path, bdata[id]['species']), bdata[id]['source'] )
-        print >>sys.stdout, 'Rsync command:\nrsync -av %s %s' % (build_source, build_dest)
-        if not args.dry_run:
-            subprocess.check_output(["rsync", "-av", build_source, build_dest])
+        synccommands(build_source, build_dest, args.dry_run) 
+        # print >>sys.stdout, 'Rsync command:\nrsync -av %s %s' % (build_source, build_dest)
+        #if not args.dry_run:
+        #    subprocess.check_output(["mkdir", "-p", build_dest])        
+        #    subprocess.check_output(["rsync", "-av", build_source, build_dest])
+        #    subprocess.check_output(["chmod", "-av", build_source, build_dest])
     elif id == 'ALL':
         for bid in bdata.keys():
             build_source = bdata[bid]['path']
             build_dest   = os.path.join( os.path.join(args.dest_path, bdata[bid]['species']), bdata[bid]['source'] )
-            print >>sys.stdout, 'Rsync command:\nrsync -av %s %s' % (build_source, build_dest)
-            if not args.dry_run:
-                subprocess.check_output(["rsync", "-av", build_source, build_dest])            
+            synccommands(build_source, build_dest, args.dry_run) 
+            # print >>sys.stdout, 'Rsync command:\nrsync -av %s %s' % (build_source, build_dest)
+            # if not args.dry_run:
+            #     subprocess.check_output(["rsync", "-av", build_source, build_dest])            
     else:
         sys.exit('Error, build "%s" is not available.' % id)
 
