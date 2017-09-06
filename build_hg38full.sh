@@ -183,3 +183,17 @@ cd Homo_sapiens/UCSC/hg38full/Sequence/Hisat2Index
 module load hisat2/2.0.4
 hisat2-build --snp snp144.snp --haplotype snp144.haplotype --ss genes.splice --exon genes.exon genome.fa genome_snp_tran
 EOF
+
+### Kallisto setup #######################################################################
+module load cufflinks/2.2.1
+module load kallisto
+
+cd /groups/cbi/shared/References/cbi_reference_genomes.git/References/Homo_sapiens/UCSC/hg38full
+mkdir -p Sequence/KallistoIndex
+
+# Extract transcripts
+gffread Annotation/Genes/genes.gtf -M -d Sequence/KallistoIndex/dupinfo.txt -g Sequence/WholeGenomeFasta/genome.fa  -w Sequence/KallistoIndex/transcripts.fa
+# Create a transcript list
+cat Sequence/KallistoIndex/transcripts.fa | grep ">" | perl -ne '$_ =~ s/\>//; print $_' | sort | uniq > Sequence/KallistoIndex/transcripts_list.txt
+# Build Kallisto index
+kallisto index -i Sequence/KallistoIndex/transcripts Sequence/KallistoIndex/transcripts.fa
