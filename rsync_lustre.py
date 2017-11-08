@@ -3,6 +3,7 @@ import sys
 import os
 from glob import glob
 import subprocess
+from subprocess import Popen, PIPE
 
 """
 spath = './References'
@@ -30,22 +31,32 @@ else:
 """
 
 def synccommands(bsource, bdest, dry=False):
-    dry = True
-    pre,id = os.path.split(bsource)
+    pre,build = os.path.split(bsource)
+    pre,source = os.path.split(pre)
+    id = '%s.%s' % (source, build)
+    
     if not os.path.isdir(bdest):
         print >>sys.stdout, '# Create destination directory:'
         print >>sys.stdout, 'mkdir -p %s' % (bdest)
         if not dry: subprocess.check_output(["mkdir", "-p", bdest])
     else:
         print >>sys.stdout, '# Destination directory found.'
-    print >>sys.stdout, '# Rsync command for %s:' % id
-    print >>sys.stdout, 'rsync -av %s %s' % (bsource, bdest)
-    if not dry: subprocess.check_output(["rsync", "-av", bsource, bdest])    
+    cmd = 'rsync -av %s %s' % (bsource, bdest)        
+    print >>sys.stdout, '# Rsync command for %s:\n%s' % (id, cmd)
+    if not dry:
+        print >>sys.stdout, '# Beginning sync...' 
+        p1 = Popen(cmd, shell=True)
+        p1.communicate()
+        print >>sys.stdout, '# Sync complete for %s' % id
+    else:
+        print >>sys.stdout, '# Dry-run complete for %s' % id    
+    # if not dry: subprocess.check_output(["rsync", "-av", bsource, bdest])    
+    # if not dry: subprocess.Popen("rsync -av %", bsource, bdest])    
     # print >>sys.stderr, 'Set directory permissions:\n\tfind %s -type d -exec chmod 0555 {} \;' % os.path.join(bdest,id)
     # if not dry: subprocess.check_output(["find", os.path.join(bdest,id), '-type', 'd', '-exec', 'chmod', '0555', '{}', '\;'])
     # print >>sys.stderr, 'Set file permissions:\n\tfind %s -type f -exec chmod 0444 {} \;' % os.path.join(bdest,id)
     # if not dry: subprocess.check_output(["find", os.path.join(bdest,id), '-type', 'f', '-exec', 'chmod', '0444', '{}', '\;'])
-    print >>sys.stdout, '# Sync complete for %s' % id
+
 
 def main(args):
     build_paths = sorted(glob(os.path.join(args.source_path, '*/*/*')))
@@ -57,16 +68,17 @@ def main(args):
         pre,build = os.path.split(bp)
         pre,source = os.path.split(pre)
         pre,species = os.path.split(pre)
-        bdata[build] = {'path':bp, 'prefix':pre, 'source':source, 'species':species, 'build':build}    
-
+        bdata['%s.%s' % (source, build)] = {'path':bp, 'prefix':pre, 'source':source, 'species':species, 'build':build}    
+    
+    c1 = max(len(k) for k in list(bdata.keys())) + 1
     if args.build is None:
         print >>sys.stderr, "Genomes available for sync:"
-        print >>sys.stderr,  "Build".ljust(16) + "Species".ljust(29) + "Source".ljust(16) + "Prefix"
+        print >>sys.stderr,  "ID".ljust(c1) + "|   " + "Species".ljust(25) + "Source".ljust(16) + "Build".ljust(16) + "Prefix"
         print >>sys.stderr,  ''.join(['-'] * 80)
         for b in sorted(bdata.keys()):
-            print >>sys.stderr, '%s%s%s%s' % (bdata[b]['build'].ljust(16), bdata[b]['species'].ljust(32), bdata[b]['source'].ljust(16), bdata[b]['prefix'])
-        print >>sys.stderr,  ''.join(['-'] * 80)            
-        id = raw_input("Enter build name to sync: ")
+            print >>sys.stderr, '%s|   %s%s%s%s' % (b.ljust(c1), bdata[b]['species'].ljust(25),  bdata[b]['source'].ljust(16), bdata[b]['build'].ljust(16), bdata[b]['prefix'])
+        print >>sys.stderr,  ''.join(['-'] * 80)
+        id = raw_input("Enter ID for sync: ")
     else:
         id = args.build
 

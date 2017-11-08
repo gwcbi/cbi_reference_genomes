@@ -8,6 +8,8 @@
 | *Homo sapiens*| UCSC          | hg19      | 25   | &#10003; | &#10003;|[iGenomes](http://support.illumina.com/sequencing/sequencing_software/igenome.html)    |
 |               |               | hg38      | 195  | &#10003; | &#10003;| Includes unlocalized (random) and unplaced (chrUn) contigs, plus EBV. [iGenomes](http://support.illumina.com/sequencing/sequencing_software/igenome.html)     |
 |               |               | hg38full  | 456  | &#10003; | &#10003; | hg38 (above) plus alternate haplotypes (261 sequences) |
+|               | HISAT2        | hg19      | 93   |          | &#10003; | Pre-built by [CCB](https://ccb.jhu.edu/software/hisat2/manual.shtml) |
+|               | HISAT2        | hg38      | 455  |          | &#10003; | Pre-built by [CCB](https://ccb.jhu.edu/software/hisat2/manual.shtml) |
 | *Ceratotherium simum* (white rhino) | UCSC | cerSim1| 3087 | | | |
 | *Mus musculus* | Ensembl | GRCm38 | 22 | &#10003; | &#10003; | [iGenomes](http://support.illumina.com/sequencing/sequencing_software/igenome.html)     |
 
